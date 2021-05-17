@@ -1,0 +1,15 @@
+fn sub( int x ) => int {
+    put x;
+    return 0;
+}
+
+fn sub2( int y ) => int {
+    sub(y);
+    return 0;
+}
+
+fn main( void ) => int {
+    let count::int = 12;
+    sub2( count );
+    return 0;
+}

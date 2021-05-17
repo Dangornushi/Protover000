@@ -1,0 +1,28 @@
+
+sub(intx):
+mode>int;
+pop x;
+msg x;
+msg "\n";
+ret sub, 0;
+end;
+cb;
+
+
+sub2(inty):
+mode>int;
+pop y;
+call sub[y];
+ret sub2, 0;
+end;
+cb;
+
+
+main():
+mode>int;
+mov count 12;
+call sub2[count];
+ret main, 0;
+end;
+cb;
+
