@@ -56,7 +56,6 @@ t_OPWARU = r'\/'
 t_OPMIN = r'\-'
 t_KAKKO = r'\('
 t_KOKKA = r'\)'
-t_QOT = r"\""
 
 t_ignore = ' \t'
 t_EQUALS = r'='
@@ -89,9 +88,6 @@ def t_LISR(t):
 def t_STR(t):
     r'[\/\/*\"\'!][ 0-9a-zA-Z_$,.><\\ \/\"\'!\?\():\*/]*'
     global strc, comc, lisc
-    if t.value.startswith( "\"" ) or t.value.startswith( "'" ):
-        t.type = "STR"
-        strc += 1
     if t.value == "/*":
         comc += 1
         t.type = "PASS"
@@ -110,7 +106,7 @@ def t_STRUCT(t):
     return t
 
 def t_ID(t):
-    r'[@\,a-zA-Z_$\!][0-9a-zA-Z_$,\"\'!\?]*'
+    r'[@\,a-zA-Z_$\"\!][0-9a-zA-Z_$,\"\'!\?]*'
     global strc, comc, lisc
     if t.value == ";":
         t.type == "SEMI"
@@ -133,6 +129,8 @@ def t_ID(t):
             t.type = 'ELSE'
         elif t.value == "while":
             t.type = "WHILE"
+        elif t.value == "\"":
+            t.type = "STR"
         elif t.value == "global":
             t.type = "GLOBAL"
         elif t.value == "fninclude":

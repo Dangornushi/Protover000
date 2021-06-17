@@ -355,7 +355,6 @@ def p_bun_insert(p):
 def p_bun_reserv (p):
     '''
     bun : RESERV KAKKO shiki KOKKA SEMI
-        | RESERV KAKKO STR KOKKA SEMI
     '''
     p[0] = ( "RES",p[1],p[3] )
 
@@ -759,6 +758,7 @@ class Walker:
                 nowvar = ast[2]
                 strd[ast[2]] = ast[3]
                 self.step2( ast[3] )
+                codegen.add_num({ast[2]:ast[3][1].replace( "\"", "")}, ast[2], ast[1])
         
         elif ast[0] == "ID":        
             codegen.append( ["", "mode>str;\nmov "+ast[2]+" "+ast[3][1]+";"] )
