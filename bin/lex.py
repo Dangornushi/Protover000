@@ -1,6 +1,6 @@
 import ply.lex as lex
 
-##トークンの定義
+#トークンの定義
 tokens = (
     'NUMBER',
     'OPTASU',
@@ -30,13 +30,25 @@ tokens = (
     'syounari',
     'STR',
     'PASS',
-    'INCLUDE'
+    'INCLUDE',
+    'CLASS',
+    'STRUCT',
+    'LAMDA',
+    "PIRIOD",
+    "GLOBAL",
+    "TYPEF",
+    "LIST",
+    "LEN",
+    "APPEND",
+    "QOT",
 )
 
+#int型変数の宣言。
 strc = 0
 comc = 0
 lisc = 0
 
+#正規表現一発で済ませられるtokenの定義。
 t_NUMBER = r'\d+'
 t_OPTASU = r'\+'
 t_OPKAKERU = r'\*'
@@ -44,34 +56,38 @@ t_OPWARU = r'\/'
 t_OPMIN = r'\-'
 t_KAKKO = r'\('
 t_KOKKA = r'\)'
+t_QOT = r"\""
 
 t_ignore = ' \t'
 t_EQUALS = r'='
 t_LBRACE = r'\{'
 t_RBRACE = r'\}'
-t_CONMA  = r','
 t_LISL = r'\['
-#t_LISR = r'\]'
 
 t_yaji = r"\=>"
 t_colon = r":"
 t_EQOP   = r'=='
 t_dainari = r"\>"
 t_syounari = r"\<"
+t_PIRIOD = r"\."
 
+
+#セミコロン（；）の判別のための関数。
 def t_SEMI(t):
     r'\;'
     t.type = "SEMI"
     return t
 
+#LISR（]）の判別のための関数。
 def t_LISR(t):
     r'\]'
     global lisc
     lisc = 0
     return t
 
+#STR（文字列）の判定用の関数。
 def t_STR(t):
-    r'[\/\*\"\'!][0-9a-zA-Z_$,.><\\ \/\"\'!\?\():\*]*'
+    r'[\/\/*\"\'!][ 0-9a-zA-Z_$,.><\\ \/\"\'!\?\():\*/]*'
     global strc, comc, lisc
     if t.value.startswith( "\"" ) or t.value.startswith( "'" ):
         t.type = "STR"
@@ -88,22 +104,24 @@ def t_STR(t):
         strc -= 0
     return t
 
-def t_INCLUDE(t):
-    r'[\#][a-zA-Z0-9\.\,]*'
+#struct構文の関数。いらない。
+def t_STRUCT(t):
+    r"fnstruct"
     return t
 
 def t_ID(t):
-    r'[@\/\*a-zA-Z_$\!][0-9a-zA-Z_$,\"\'!\?]*'
+    r'[@\,a-zA-Z_$\!][0-9a-zA-Z_$,\"\'!\?]*'
     global strc, comc, lisc
-    if lisc != 0:
-        t.type = "LIST"
-    elif t.value == ";":
+    if t.value == ";":
         t.type == "SEMI"
     elif t.value == "/*":
         comc += 1
         t.type = "PASS"
     elif t.value == "*/":
         comc += 1
+        t.type = "PASS"
+    
+    elif t.value == "pass":
         t.type = "PASS"
     
     elif str(comc/2).split("." )[1] == "5":
@@ -115,13 +133,27 @@ def t_ID(t):
             t.type = 'ELSE'
         elif t.value == "while":
             t.type = "WHILE"
+        elif t.value == "global":
+            t.type = "GLOBAL"
+        elif t.value == "fninclude":
+            t.type = "INCLUDE"
+        elif t.value == "class":
+            t.type = "TYPE"
+        elif t.value == "fnclass":
+            t.type = "CLASS"
+        elif t.value == "lamda":
+            t.type = "LAMDA"
+        elif t.value == ",":
+            t.type = "CONMA"
+        elif t.value == "and":
+            t.type = "CONMA"
         elif t.value == 'int':
             t.type = 'TYPE'
         elif t.value == 'str':
             t.type = 'TYPE'
         elif t.value == 'void':
             t.type = 'TYPE'
-        elif t.value == "lis":
+        elif t.value == "list":
             t.type = "TYPE"
             lisc += 1
         elif t.value == "let":
@@ -138,12 +170,18 @@ def t_ID(t):
             t.type = "RESERV"
         elif t.value == "input":
             t.type = "RESERV"
+        elif t.value == "type":
+            t.type = "TYPEF"
+        elif t.value == "len":
+            t.type = "LEN"
+        elif t.value == "append":
+            t.type == "APPEND"
         else:
             t.value = t.value.split( ";" )[0]
     return t
 
 def t_error(t):
-    print("Error '%s'" % t.value[0])
+    print("LexErr：%s。それ、あなたの感想ですよね？" % t.value[0])
     t.lexer.skip(1)
 
 def t_newline(t):

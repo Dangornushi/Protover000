@@ -1,24 +1,69 @@
 #include "main.hpp"
 
 //2531.0,275,696.0
-//-5861.3, 2.5, -1503.9
+//-1901.7 , 5.1, 60.8
 //Proro Mk.0
 //VM
 
+//int格納用変数初期化
 int qoc = 0;
+int  popc=-1;
+int gnamesc = 0;
+
+//string格納用変数初期化
+string classfunc = "";
+string funcn;
+string nowclass = "";
+
+//map格納用変数初期化(str/int)--------
+map<string, int> intvall;
+map<string, int> intvall2;
+map<string, int> g_intvall;
+//--------
+
+//map格納用変数初期化(str/str)--------
+map <string, string> strvall;
+map <string, string> strvall2;
+map <string, string> g_strvall;
+//--------
+
+//map格納用変数初期化(str/map)--------
 map<string, map<string, string> > scop;
 map<string, map<string, int> > scopint;
-map<string, int> intvall;
-map <string, string> strvall;
-vector<string> funcnames;
+//--------
 
+//vector格納用変数初期化
+vector<string> funcnames;
+vector<string> gnames;
+//--------
+
+/*
+TODO => VM関数
+        引数：
+            関数名格納用辞書(str/str)
+            関数名格納用変数(string)
+            whileloopカウント用変数(int)
+        概要：
+            コード実行部分本体。
+            変数格納／
+            標準関数実行／
+            四則演算実行／
+            if文・while文実行／
+            変数スコープ判定／
+            文字列連結／
+            classインスタンス／
+            class内関数実行／
+            関数呼び出し／
+            ret・popレジスタ実行／
+
+*/
 void VM ( map<string, string> func, string funcname, int loopj ) {
     vector<string> vec = split( func[funcname], "3b" ), vec2, vec3;
     map <string, string> strin;
     string vdata, ans, a, b, mode, fode, anser;
     stringstream ss, ss2;
 
-    int y, x, popc=-1, callc=0;
+    int y, x, callc=0;
 
     funcnames.push_back(funcname);
 
@@ -96,6 +141,7 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                 string ans = split( split( strpri(vdata), "mov " )[1], " " )[0] ;
                 string a = split( strpri( vdata), "mov "+ans+" " )[1];
                 string data = a;
+
                 if( mode == "int" ) {
                     if ( intkeyfind ( intvall, data ) ) {
                         intvall[ans] = intvall[ data ];
@@ -104,25 +150,47 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                         intvall[ans] = atoi( data.c_str() );
                     }
                 }
+                
                 else
                 if ( mode == "str" ) {
-                    strvall[ans] = data;
-                }
-                else
-                if ( mode == "ind" ) {
-                    ans = split( ans, "," )[0];
-                    if ( intkeyfind( intvall, split ( split( data, "[" )[1], "]" )[0] ) ) {
-                        strvall[ ans ] = split (  strvall [ split( data, "[" )[0] ], "\", \"" ) [ intvall [ split ( split( data, "[" )[1], "]" )[0] ]  ];
+                    if ( keyfind ( strvall, data ) ) {
+                        strvall[ans] = strvall[ data ];
                     }
                     else {
-                        strvall[ ans ] = regex_replace( split (  strvall [ split( data, "[" )[0] ], "\", \"" ) [atoi( split ( split( data, "[" )[1], "]" )[0].c_str() )], regex( "\"" ), "" ) ;
+                        strvall[ans] = data;
                     }
                 }
+                
+                else
+                if ( mode == "indstr" ) {
+                    ans = split( ans, "," )[0];
+                    auto index = split ( split( data, "[" )[1], "]" )[0];
+                    if ( intkeyfind( intvall, index ) ) {
+                        strvall[ ans ] = split (  strvall [ split( data, "[" )[0] ], "\", \"" ) [ intvall[index] ];
+                    }
+                    else {
+                        strvall[ ans ] = split( strvall [ split( data, "[" )[0] ], ", " )[atoi( index.c_str() )];
+                    }
+                }
+
+                else
+                if ( mode == "indint" ) {
+                    ans = split( ans, "," )[0];
+                    auto index = split ( split( data, "[" )[1], "]" )[0];
+                    if ( intkeyfind( intvall, index ) ) {
+                        intvall[ ans ] = atoi( split (  strvall [ split( data, "[" )[0] ], "\", \"" ) [ intvall[index] ].c_str() );
+                    }
+                    else {
+                        intvall[ ans ] = atoi( split( strvall [ split( data, "[" )[0] ], ", " )[atoi( index.c_str() )].c_str() );
+                    }
+                }
+                
                 else
                 if ( mode == "lis" ) {
                     ans = split( ans, "," )[0];
-                    strvall[ans] = split( strpri( vdata ), "mov "+ans+", " )[1] ;
+                    strvall[ans] = split( strpri( vdata ), "mov "+ans+", " )[1];
                 }
+                
                 else
                 if ( mode == "lisin" ) {
                     string word = split ( split( strpri( vdata ), "mov " )[1], "[" ) [0];
@@ -135,7 +203,70 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                         strvall [ word ] = split( strvall [ word ], a )[0] + " " + arg + " , " + a + split( strvall [ word ], a )[1] ;
                     }
                 }
+                
+                else
+                if ( mode == "type" ) {
+                    if ( keyfind( strvall, data) ) {
+                        strvall[ans] = "str";
+                    }
+                    else
+                    if ( intkeyfind( intvall, data) ) {
+                        strvall[ans] = "int";
+                    }
+                }
+                
+                else
+                if ( mode == "constr" ) {
+                    if ( intkeyfind( intvall, data) ) {
+                        strvall[ans] = to_string( intvall[ data ] ).c_str() ;
+                    }
+                    else {
+                        strvall[ans] = data;
+                    }
+                    
+                }
+                
+                else
+                if ( mode == "conint" ) {
+                    if ( intkeyfind( intvall, data) ) {
+                        strvall[ans] = to_string( intvall[ data ] ).c_str() ;
+                    }
+                    else {
+                        strvall[ans] = data;
+                    }
+                    
+                }
+
+                else
+                if (mode == "len") {
+                    intvall[ans] = split( strvall[data], ", " ).size();
+                }
+
+                else
+                if (mode == "append") {
+                    if ( split( strvall[ans], ", " ).size() < atoi( split( strpri(vdata), " ")[2].c_str() ) ) {
+
+                    }
+                    else {
+                        string vecd = "";
+                        for ( int i = 0; i < split( strvall[ans], ", " ).size(); i++ ) {
+                            vecd += split( strvall[ans], ", " )[i]+", " ;
+                            if ( i == atoi( split( strpri(vdata), " ")[2].c_str() )-1 ) {
+                                vecd += split( strpri(vdata), " ")[3]+", ";
+                            }
+                        }
+                        strvall[ans] = vecd;
+                    }
+                }
+
                 scopint[funcname] = intvall;
+                scop[funcname] = strvall;
+
+                if ( mode == "g-str" ) {
+                    g_strvall[ans] = data;
+                    gnames[gnamesc] = ans;
+                    gnamesc++;
+                }
             }
 
             else
@@ -150,25 +281,9 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
             
             else
             if ( vdata.find( "6d6f64653e" ) != string::npos ) {
-                if ( split( vdata, "6d6f64653e" )[1] == "696e74" ) {
-                    mode = "int";
-                }
-                else
-                if ( split( vdata, "6d6f64653e" )[1] == "737472" ) {
-                    mode = "str";
-                }
-                else
-                if ( strpri( split( vdata, "6d6f64653e" )[1] ) == "lis" ) {
-                    mode = "lis";
-                }
-                else
-                if ( strpri( split( vdata, "6d6f64653e" )[1] ) == "ind" ) {
-                    mode = "ind";
-                }
-                else
-                if ( strpri( split( vdata, "6d6f64653e" )[1] ) == "lisin" ) {
-                    mode = "lisin";
-                }
+                
+                // TODO: This is mode
+                mode = strpri( split( vdata, "6d6f64653e" )[1] );
             }
             
             else
@@ -185,11 +300,16 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                 string arg = split( split( vdata, "5d" )[0], "5b" )[1], arg2;
                 vector<string> vec;
                 if ( arg.find( "2c" ) != string::npos ) {
-                    vec = split( arg, "2c" );
+                    vec = split( arg, "2c20" );
                     for ( int i = 0; i < vec.size(); i++ ) {
                         vec[i] = strpri(vec[i]);
-                        scop[ split ( split( vdata, "5b" )[0], "63616c6c20" )[1] ] [ to_string(i) ] = strvall[ vec[i] ] ;
-                        scopint[ split ( split( vdata, "5b" )[0], "63616c6c20" )[1] ] [ to_string(i) ] = intvall[ vec[i] ] ;
+                        if ( keyfind( strvall, vec[i] ) ) {
+                            scop[ split ( split( vdata, "5b" )[0], "63616c6c20" )[1] ] [ to_string(i) ] = strvall[ vec[i] ] ;
+                        }
+                        else
+                        if ( intkeyfind( intvall, vec[i] ) ) {
+                            scopint[ split ( split( vdata, "5b" )[0], "63616c6c20" )[1] ] [ to_string(i) ] = intvall[ vec[i] ] ;
+                        } 
                     }
                 }
                 else {
@@ -270,6 +390,7 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                 string arg = strpri( split( vdata, "706f7020" )[1]);
                 if ( mode == "str" ) strvall [ arg ] = strvall[ to_string( popc+1 ) ];
                 if ( mode == "int" ) intvall [ arg ] = intvall[ to_string( popc+1 ) ];
+                popc++;
             }
 
             else
@@ -286,11 +407,12 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                     arg = split( base, "2c20" )[1];
                 }
                 if ( fode == "int" ) {
-                    intvall [ strpri( funcn ) ] = atoi( strpri( arg ).c_str() ) ;
+                    scopint[ funcnames[vecindex( funcnames, funcname )-1 ] ][ strpri( funcn ) ] = intvall[ strpri( arg ) ] ;
+
                 }
                 else
                 if ( fode == "str" ) {
-                    strvall [ strpri( funcn ) ] = strpri( arg.c_str() ) ;
+                    scop[ funcnames[vecindex( funcnames, funcname )-1 ] ][ strpri( funcn ) ] = strvall[ strpri( arg ) ] ;
                 }// TODO
                 //break;
             }
@@ -375,10 +497,69 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                 intvall = scopint[ funcnames[vecindex( funcnames, funcname )-1 ] ];
                 strvall = scop[ funcnames[vecindex( funcnames, funcname )-1 ] ];
             }
+
+            else
+            if ( strpri( vdata ).find( "inst" ) != string::npos ) {
+                string base = split( strpri( vdata ), "inst " )[1];
+                string ins1 = split( base, ", " )[0];
+                string ins2 = split( split( vdata, "696e737420" )[1], "2c20" )[1];
+
+                g_strvall[ ins1 ] = ins2;
+            }
+
+            else
+            if ( strpri( vdata ).find( "in>" ) != string::npos ) {
+                string funcif = split( split( vdata, "3e" )[1], "5b" )[0];
+                if ( funcif == funcn ) {
+                    intvall = scopint[ funcn ];
+                    strvall = scop[ funcn ];
+                    VM ( func, funcn, loopj );
+                }
+            }
+
+            else
+            if ( strpri( vdata ).find( "class>" ) != string::npos )  {
+                string nowclass2 = split( split( vdata, "3e" )[1], "20" )[0];
+                nowclass = strpri( nowclass2 );
+                string arg = split( split( vdata, "5d" )[0], "5b" )[1], arg2;
+                funcn = split( split( split( vdata, "3e" )[1], nowclass2+"20" )[1], "5b" )[0];
+
+                vector<string> vec;
+                if ( arg.find( "2c20" ) != string::npos ) {
+                    vec = split( strpri( arg ), ", " );
+                    for ( int i = 0; i < vec.size(); i++ ) {
+                            if ( vec[i] != "" ) {
+                                if ( keyfind( strvall, vec[i] ) ) {
+                                    scop[ funcn ] [ to_string(i) ] = strvall[ vec[i] ] ;
+                                }
+                                else
+                                if ( intkeyfind( intvall, vec[i] ) ) {
+                                    scopint[ funcn ] [ to_string(i) ] = intvall[ vec[i] ] ;
+                                } 
+                            }
+                        }
+                }
+                else {
+                        arg2 = strpri( arg );
+                        scop[ funcn ] [ to_string( callc ) ] = strvall [ arg2 ] ;
+                        scopint[ funcn ] [ to_string( callc ) ] = intvall [ arg2 ] ;
+                        callc++;
+                }
+                VM( func, g_strvall[ nowclass ], loopj );
+            }
         }
     }
 }
 
+/*
+TODO => main関数
+        引数：
+            コマンドライン引数(ファイルオープン用ファイル名取得)
+        概要：
+            ファイルオープン(16進数)／
+            関数ごとに関数辞書に格納／
+            mainにあたる内容からVM関数に引き渡し／
+*/
 int main( int argc, char **arg ){
     ifstream fin( split( arg[1], "." )[0], ios::in | ios::binary );
     string funcname, data;

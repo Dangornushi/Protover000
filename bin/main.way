@@ -1,27 +1,14 @@
 
-sub(intx):
-mode>int;
-pop x;
-msg x;
-msg "\n";
-ret sub, 0;
-end;
-cb;
-
-
-sub2(inty):
-mode>int;
-pop y;
-call sub[y];
-ret sub2, 0;
-end;
-cb;
-
-
 main():
-mode>int;
-mov count 12;
-call sub2[count];
+fode>int;
+mode>lis;
+mov l, 1, 2, 3, 4, 5, 6, 7;
+mode>append;
+mov l 1 3;
+mode>indint;
+mov x, l[1];
+msg OK;
+msg "\n";
 ret main, 0;
 end;
 cb;
