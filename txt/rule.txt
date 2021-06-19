@@ -1,0 +1,19 @@
+shiki : ID, STR, LIST, その他文字列
+
+fn define : fn ID ( shiki ) { bun } [teigi]
+class define : class ID { bun } [teigi]
+
+
+int ID = shiki ; [bun] 
+    int calc define 
+    int define
+
+str ID = shiki ; [bun]
+    str define
+    list arg define
+
+list ID = shiki ; [bun]
+    list define
+
+ID [ shiki ] = ( STR | NUMBER | ID | shiki ) ;
+    list in arg define

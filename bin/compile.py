@@ -82,6 +82,12 @@ def p_call(p):
     '''
     p[0] = ( "CALL", p[1], p[3] )
 
+def p_bun_inline(p):
+    """
+    bun : INLINE KAKKO shiki KOKKA SEMI
+    """
+    p[0] = ( "INLINE", p[3] )
+
 def p_comment(p):
     """
     teigi : STR
@@ -370,11 +376,17 @@ def p_shiki_call_void(p):
     '''
     p[0] = ( "CALL", p[1], "void" )
 
+def p_shiki_list(p):
+    """
+    shiki : ID LISL shiki LISR
+    """
+    p[0] = ( "LISARG", p[1], p[3])
+
 def p_lets(p):
     """
-    bun : TYPE TYPE LBRACE letlist RBRACE SEMI
+    bun :  TYPE LBRACE letlist RBRACE SEMI
     """
-    p[0] = ( "LETS", p[2], p[4] )
+    p[0] = ( "LETS", p[1], p[3] )
 
 def p_letsglobal(p):
     """
@@ -706,7 +718,12 @@ class Walker:
                             vallw = item[1]+item[2]
             except KeyError:
                 print("DefineErr："+ast[1]+"？なんすか、"+ast[1]+"って")
-            
+
+        elif ast[0] == "LISARG":
+            if ast[2][0] == "NUM":
+                index = ast[2][1]
+
+            codegen.append( ["", "mode>indstr;\nmov "+nowvar+", "+ast[1]+"["+index+"];"] )
 
         elif ast[0] == "RES":
             if ast[1] == "put":
@@ -717,8 +734,15 @@ class Walker:
                         codegen.add_msg( ast[2][1] )
                         codegen.add_msg( "\"\\n\"" )
                     except:
-                        codegen.add_msg( ast[2][1] )
-                        codegen.add_msg( "\"\\n\"" )
+                        if ast[2] == "STR":
+                            codegen.add_msg( ast[2][1] )
+                            codegen.add_msg( "\"\\n\"" )
+                        else:
+                            nowvar = "0_VAR"
+                            self.step2( ast[2] )
+                            codegen.add_msg( "0_VAR" )
+                            codegen.add_msg( "\"\\n\"" )
+
                 else:
                     codegen.add_msg( ast[2] )
                     codegen.add_msg( "\"\\n\"" )
@@ -890,6 +914,12 @@ class Walker:
             
             funclis.append(ast[1]+":"+vallw)
             funcd[ast[1]] = ast[4]
+
+        elif ast[0] == "INLINE":
+            if type( strd[ast[1][1]] ) == str:
+                codegen.append( ["", strd[ast[1][1]].replace("\"", "")+";"] )
+            else:
+                codegen.append( ["", strd[ast[1][1]][1].replace("\"", "")+";"] )
 
         elif type(ast[0]) == tuple:
             for item in ast:

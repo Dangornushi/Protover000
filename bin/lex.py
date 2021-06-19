@@ -41,6 +41,7 @@ tokens = (
     "LEN",
     "APPEND",
     "QOT",
+    "INLINE",
 )
 
 #int型変数の宣言。
@@ -106,7 +107,7 @@ def t_STRUCT(t):
     return t
 
 def t_ID(t):
-    r'[@\,a-zA-Z_$\"\!][0-9a-zA-Z_$,\"\'!\?]*'
+    r'[@\,a-zA-Z_$\"\! ][0-9a-zA-Z_$,\"\'!\?]*'
     global strc, comc, lisc
     if t.value == ";":
         t.type == "SEMI"
@@ -130,7 +131,7 @@ def t_ID(t):
         elif t.value == "while":
             t.type = "WHILE"
         elif t.value == "\"":
-            t.type = "STR"
+            t.type = "QOT"
         elif t.value == "global":
             t.type = "GLOBAL"
         elif t.value == "fninclude":
@@ -174,6 +175,8 @@ def t_ID(t):
             t.type = "LEN"
         elif t.value == "append":
             t.type == "APPEND"
+        elif t.value == "__asm__":
+            t.type = "INLINE"
         else:
             t.value = t.value.split( ";" )[0]
     return t
