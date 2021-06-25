@@ -14,6 +14,7 @@
 #include <utility>
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
 
 //----------------------
 
@@ -47,3 +48,6 @@ vector<string> include_pack( string file, string name ) ;
 string edit( string data, map<string, string> funcs, string maindata, int whilen, map<string, int>intvall ) ;
 string setdata ( string data, map<string, string> funcs, int whilen ) ;
 int vecindex( vector< string >list, string word ) ;
+double fib(int n) ;
+string lblock( string word ) ;
+bool isParam (string line) ;

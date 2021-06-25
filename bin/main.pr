@@ -1,5 +1,12 @@
+include dango.ph
+include math.rh
+
 fn main => int {
-    list l = [ 1, 2, 3, 4, 5, 6, 7 ];
-    put(l[3]);
+    int x = 8;
+    int y = 12;
+    int dango = fib(x);
+    int dango2 = max(x and y);
+    put(dango);
+    put(dango2);
     return 0;
 }

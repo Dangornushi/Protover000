@@ -409,3 +409,32 @@ map <string, int> calcproc( map<string, int>intvall, string mark, string mode, s
     }
     return intvall;
 }
+
+double fib(int n) {
+    double v;
+    if (n <= 0) {
+        v = 0.0;
+    }
+    else if (n == 1) {
+        v = 1.0;
+    }
+    else {
+        v = fib(n - 2) + fib(n - 1);
+    }
+    return v;
+}
+
+bool isParam (string line)
+{
+    if (isdigit(atoi(line.c_str())))
+        return true;
+
+    return false;
+}
+
+string lblock( string word ) {
+    if ( word.substr( 0, 1 ) == "L" and isParam(split( word, "L")[1]) ) {
+        print(word);
+    }
+    return word;
+}

@@ -65,7 +65,14 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
 
     int y, x, callc=0;
 
-    funcnames.push_back(funcname);
+    //TODO : funcnames
+    if ( strpri( funcname).substr( 0, 1 ) == "L" and atoi( split( strpri( funcname ), "L" )[1].c_str()) >= 0 ) {
+        //print( strpri( funcname ) );
+    }
+    else 
+    if ( funcname != "" ) {    
+        funcnames.push_back(funcname);
+    }
 
     for ( int i = 0; i < vec.size(); i++ ) {
         vdata = vec[i];
@@ -88,12 +95,18 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
             
             else
             if ( vdata.find( "61646420" ) != string::npos ) {
+                //TODO : add
                 string mark = "616464" ;
                 string base = replace( vdata, "61646420" );
                 string ans = strpri( split( base, "2c20" )[0] );
                 string vall = strpri( split( base, "2c20" )[1] );
-                int a = intvall[ans];    
-                intvall[ans] = a + atoi( vall.c_str() );
+                int a = intvall[ans];
+                if ( intkeyfind( intvall, vall ) ) {
+                    intvall[ans] = a + intvall[ vall ];
+                }
+                else {
+                    intvall[ans] = a + atoi( vall.c_str() );
+                }
             }
             
             else
@@ -141,6 +154,7 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                 string ans = split( split( strpri(vdata), "mov " )[1], " " )[0] ;
                 string a = split( strpri( vdata), "mov "+ans+" " )[1];
                 string data = a;
+
 
                 if( mode == "int" ) {
                     if ( intkeyfind ( intvall, data ) ) {
@@ -256,6 +270,17 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                             }
                         }
                         strvall[ans] = vecd;
+                    }
+                }
+
+                else
+                if ( mode == "fib" ) {
+
+                    if ( intkeyfind( intvall, data ) ) {
+                        intvall [ans] = fib( intvall[ data.c_str() ] );
+                    }
+                    else {
+                        intvall [ans] = fib(  atoi( data.c_str() ) );
                     }
                 }
 
@@ -389,12 +414,13 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                 // TODO : This is "pop"
                 string arg = strpri( split( vdata, "706f7020" )[1]);
                 if ( mode == "str" ) strvall [ arg ] = strvall[ to_string( popc+1 ) ];
-                if ( mode == "int" ) intvall [ arg ] = intvall[ to_string( popc+1 ) ];
+                if ( mode == "int" ) intvall [ arg ] = intvall[ to_string( popc +1) ];
                 popc++;
             }
 
             else
             if ( vdata.find( "72657420" ) != string::npos ) {
+                funcnames.push_back( funcnames[vecindex( funcnames, funcname )-1 ] );
                 // TODO : This is return ( ret )
                 string base = split( vdata, "72657420" )[1];
                 string funcn, arg;
@@ -407,8 +433,7 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                     arg = split( base, "2c20" )[1];
                 }
                 if ( fode == "int" ) {
-                    scopint[ funcnames[vecindex( funcnames, funcname )-1 ] ][ strpri( funcn ) ] = intvall[ strpri( arg ) ] ;
-
+                    scopint[ funcnames[vecindex( funcnames, funcname )+1] ][ strpri( funcn ) ] = intvall[ strpri( arg ) ] ;
                 }
                 else
                 if ( fode == "str" ) {
@@ -496,6 +521,7 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
             if ( strpri( vdata ) == "end") {
                 intvall = scopint[ funcnames[vecindex( funcnames, funcname )-1 ] ];
                 strvall = scop[ funcnames[vecindex( funcnames, funcname )-1 ] ];
+                return;
             }
 
             else
@@ -546,6 +572,10 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                         callc++;
                 }
                 VM( func, g_strvall[ nowclass ], loopj );
+            }
+            else
+            if ( strpri( vdata ).find( "exit" ) != string::npos )  {
+                exit(0);
             }
         }
     }
