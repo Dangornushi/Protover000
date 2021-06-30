@@ -9,6 +9,7 @@
 int qoc = 0;
 int  popc=-1;
 int gnamesc = 0;
+int funclisc = 0;
 
 //string格納用変数初期化
 string classfunc = "";
@@ -78,7 +79,6 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
         vdata = vec[i];
         if ( vdata != "" ) {
             vdata = regex_replace( vdata, regex( "5c6e" ), "5c" );
-            
             if ( strpri( vdata ).find( "stradd " ) != string::npos ) {
                 string base = split( strpri( vdata ), "stradd " )[1];
                 string x = split( base, ", " )[0];
@@ -101,6 +101,7 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                 string ans = strpri( split( base, "2c20" )[0] );
                 string vall = strpri( split( base, "2c20" )[1] );
                 int a = intvall[ans];
+                //TODO * 
                 if ( intkeyfind( intvall, vall ) ) {
                     intvall[ans] = a + intvall[ vall ];
                 }
@@ -154,7 +155,6 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                 string ans = split( split( strpri(vdata), "mov " )[1], " " )[0] ;
                 string a = split( strpri( vdata), "mov "+ans+" " )[1];
                 string data = a;
-
 
                 if( mode == "int" ) {
                     if ( intkeyfind ( intvall, data ) ) {
@@ -414,7 +414,7 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                 // TODO : This is "pop"
                 string arg = strpri( split( vdata, "706f7020" )[1]);
                 if ( mode == "str" ) strvall [ arg ] = strvall[ to_string( popc+1 ) ];
-                if ( mode == "int" ) intvall [ arg ] = intvall[ to_string( popc +1) ];
+                if ( mode == "int" ) intvall [ arg ] = intvall[ to_string( popc+1) ];
                 popc++;
             }
 
@@ -432,18 +432,34 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                     funcn = split( base, "2c20" )[0];
                     arg = split( base, "2c20" )[1];
                 }
-                if ( fode == "int" ) {
-                    scopint[ funcnames[vecindex( funcnames, funcname )+1] ][ strpri( funcn ) ] = intvall[ strpri( arg ) ] ;
+                int spc = 0;
+                if ( funclisc != 0 ) {
+                    spc = funclisc+1;
+                    // TODO : fodo指定されない、指定する。classteigiのclass定義された瞬間にfode指定
+                    if ( fode == "int" ) {
+                        scopint[ funcnames[vecindex( funcnames, funcname )-spc] ][ strpri( funcn ) ] = intvall[ strpri( arg ) ] ;
+                    }
+                    else
+                    if ( fode == "str" ) {
+                        scop[ funcnames[vecindex( funcnames, funcname )-spc ] ][ strpri( funcn ) ] = strvall[ strpri( arg ) ] ;
+                    }// TODO
+                    //break;
                 }
-                else
-                if ( fode == "str" ) {
-                    scop[ funcnames[vecindex( funcnames, funcname )-1 ] ][ strpri( funcn ) ] = strvall[ strpri( arg ) ] ;
-                }// TODO
-                //break;
+                else {
+                    spc = 1;
+                    if ( fode == "int" ) {
+                        scopint[ funcnames[vecindex( funcnames, funcname )+1+spc] ][ strpri( funcn ) ] = intvall[ strpri( arg ) ] ;
+                    }
+                    else
+                    if ( fode == "str" ) {
+                        scop[ funcnames[vecindex( funcnames, funcname )+1+funclisc ] ][ strpri( funcn ) ] = strvall[ strpri( arg ) ] ;
+                    }
+                }
             }
 
             else
             if ( vdata.find( "666f64653e" ) != string::npos ) {
+                //TODO : fode>
                 fode = strpri( split( vdata, "3e" )[1] );
             }
 
@@ -536,11 +552,13 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
             else
             if ( strpri( vdata ).find( "in>" ) != string::npos ) {
                 string funcif = split( split( vdata, "3e" )[1], "5b" )[0];
+                funclisc += 1;
                 if ( funcif == funcn ) {
                     intvall = scopint[ funcn ];
                     strvall = scop[ funcn ];
                     VM ( func, funcn, loopj );
                 }
+                funclisc -= 1;
             }
 
             else

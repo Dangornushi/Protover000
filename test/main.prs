@@ -1,0 +1,68 @@
+
+min(intxinty):
+fode>int;
+mode>int;
+pop x;
+mode>int;
+pop y;
+mode>int;
+mov ret 0;
+ja x, y, L0;
+jne x, y, L1;
+ret min, ret;
+end;
+cb;
+
+
+L0():
+mode>int;
+mov ret x;
+
+L1():
+mode>int;
+mov ret y;
+
+max(intx2inty2):
+fode>int;
+mode>int;
+pop x2;
+mode>int;
+pop y2;
+mode>int;
+mov ret2 0;
+ja x2, y2, L2;
+jne x2, y2, L3;
+ret max, ret2;
+end;
+cb;
+
+
+L2():
+mode>int;
+mov ret2 x2;
+
+L3():
+mode>int;
+mov ret2 y2;
+
+main():
+fode>int;
+mode>int;
+mov x 8;
+mode>int;
+mov y 12;
+mode>fib;
+mov dango x;
+mode>int;
+mov dango dango;
+call max[x, y];
+mode>int;
+mov dango2 max;
+msg dango;
+msg "\n";
+msg dango2;
+msg "\n";
+ret main, 0;
+end;
+cb;
+

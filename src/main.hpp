@@ -15,7 +15,10 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
-
+#include <iostream>
+#include <string>
+#include <filesystem>
+#include <unistd.h>
 //----------------------
 
 using namespace std;

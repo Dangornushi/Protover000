@@ -2,14 +2,17 @@
 
 int main( int argc, char **arg ) {
 
-    string comp = "./proc ";
-    string pyt = "./compile ";
+    char tmp[256];
+    string dir ( getcwd(tmp, 256), 256 );
+    dir = ""+split(dir, "/Protover000")[0]+"/Protover000";
+    string comp = dir+"/bin/proc ";
+    string pyt = dir+"/bin/compile ";
     string name = arg[1] ;
-
     comp = comp + arg[1] ;
     pyt = pyt + name ;
 
-    //system(pyt.c_str());
+
+    system(pyt.c_str());
     string inpfilename = arg[1], data;
     ifstream ifs ( inpfilename+"s" ) ;
     ofstream ofs ( split( inpfilename, "." )[0]+".way" ) ;

@@ -22,6 +22,8 @@ classlist= []
 kataw = ""
 nowvar = ""
 namestr = "L-1"
+nowvar2 = ""
+funcname = ""
 #--------
 
 #int型定義
@@ -87,6 +89,36 @@ def p_call(p):
     bun : ID KAKKO shiki KOKKA SEMI
     '''
     p[0] = ( "CALL", p[1], p[3] )
+
+def p_call(p):
+    '''
+    bun : OPEN KAKKO shiki KOKKA SEMI
+    '''
+    p[0] = ( "OPEN", p[1], p[3] )
+
+def p_call(p):
+    '''
+    bun : CLOSE KAKKO shiki KOKKA SEMI
+    '''
+    p[0] = ( "CLOSE", p[1], p[3] )
+
+def p_call(p):
+    '''
+    bun : WRITE KAKKO shiki KOKKA SEMI
+    '''
+    p[0] = ( "WRITE", p[1], p[3] )
+
+def p_call(p):
+    '''
+    bun : READ KAKKO shiki KOKKA SEMI
+    '''
+    p[0] = ( "READ", p[1], p[3] )
+
+def P_shiki_dins(p):
+    """
+    shiki : ID PIRIOD ID KAKKO shiki KOKKA
+    """
+    p[0] = ( "CLINS", p[1], p[3], p[5])
 
 def p_bun_inline(p):
     """
@@ -158,7 +190,7 @@ def p_class_fc(p):
     """
     bun : ID PIRIOD ID KAKKO shiki KOKKA SEMI
     """
-    p[0] = ( "CLINST", p[1], p[3], p[5] )
+    p[0] = ( "CLINST", p[1], p[3], ( "ID", p[5] ) )
 
 def p_pass(p):
     """
@@ -332,9 +364,9 @@ def p_shiki_conma(p):
     shiki : shiki CONMA shiki
     """
     if type(p[3]) == str:
-        p[0] = str(p[1][1]) + ", " + str(p[3])
+        p[0] = ("ID", p[1][1]) + (p[3])
     else:
-        p[0] = str(p[1][1]) + ", " + str(p[3][1])
+        p[0] = ("ID", p[1][1], p[3][1])
 
 def p_shiki_enzan(p):
     '''
@@ -380,6 +412,13 @@ def p_shiki_func_ret(p):
     shiki : ID KAKKO shiki KOKKA
     """
     p[0] = ("CALL", p[1], p[3])
+
+def p_shiki_clinst(p):
+    """
+    shiki : ID PIRIOD ID KAKKO shiki KOKKA
+    """
+    p[0] = ( "CLINST", p[1], p[3], ( "ID", p[5] ) )
+
 
 def p_shiki_call_void(p):
     '''
@@ -458,35 +497,39 @@ class CodeGenartor:
     def add_define( self , info ):
         self.append( ["\n"+info['funcname']+':'] )
     
-    def add_return( self , info ):
-        self.append( ['','end;\ncb;\n'] )
-        #TODO : end;cb;
-        global namestr
-        for name in iflis:
-            if namestr == name or int( name.split( "L" )[1] ) < int( namestr.split( "L" )[1] ) :
-                pass
-            else:
-                self.if_write( name, funcd )
-                namestr = name
-            
-        for name in funclis:
-            self.f_write( name, funcd )
+    def add_return( self ):
+            self.append( ['','end;\ncb;\n'] )
+            #TODO : end;cb;
+            global namestr
+            for name in iflis:
+                if namestr == name or int( name.split( "L" )[1] ) < int( namestr.split( "L" )[1] ) :
+                    pass
+                else:
+                    self.if_write( name, funcd )
+                    namestr = name
+            for name in funclis:
+                self.f_write( name, funcd )
         
     def f_write( self, nameandarg, funcd ):
+        global funcname 
         name =  nameandarg.split( ":" )[0]
+        funcname = name
         arg =  nameandarg.split( ":" )[1]
         if arg != "void":
             args = ""
             self.append( [ '',"\n"+name+"("+arg.replace( " ", "" ).replace( "and", "" )+"):" ] )
             arg = arg.split( " and " )
             for item in arg:
-                if item != "":
-                    self.add_vall( item.split( " " )[0], item.split( " " )[1] )
-                args += item
+                if item != "" :
+                    if item.startswith("!"):
+                        self.append( [ '',"fode>"+item.split("!")[1]+";" ] )
+                    else:
+                        self.add_vall( item.split( " " )[0], item.split( " " )[1] )
+                        args += item
         else:
-            self.append( [ '',"\n"+name+"():" ] )
-        for item in funcd[name]:
-            walker.step2( item )
+            self.append( [ '',"\n"+name.split("!")[0]+"():" ] )
+            self.append( [ '',"\nfode>"+name.split("!")[1]+";" ] )
+        walker.step2( funcd[name] )
         self.append( ['','end;\ncb;\n'] )
 
     def if_write( self, name, dic ):
@@ -501,6 +544,7 @@ class CodeGenartor:
         self.append( ['',"mode>"+mode+mold+";\n"+"mov "+arg+", "+vall+"["+index+"]"+";" ])
 
     def add_sym( self , arg, funcname ):
+        #print(funcname)
         self.append( ["ret "+funcname+", "+arg+";" ])
     
     def add_fode( self, fode ):
@@ -630,8 +674,7 @@ class Walker:
 
     def step2(self,ast):
 
-        global  funcname, mode, funclis, kataw, ifc, iflisc, lisc, ast_2, funcd, classlist, clos, nowvar
-        
+        global  funcname, mode, funclis, kataw, ifc, iflisc, lisc, ast_2, funcd, classlist, clos, nowvar, nowvar2
         if ast[0] == 'exp':
             self.step2(ast[1])
         
@@ -662,8 +705,8 @@ class Walker:
                 self.step2(item)
             for item in ast[4]:
                 self.step2(item)
-
-            codegen.add_return({'funcname':ast[2]})
+            if funcname == "main":
+                codegen.add_return( )
 
         elif ast[0] == 'ID':
             pass
@@ -717,9 +760,9 @@ class Walker:
 
         elif ast[0] == "CALL":
             size = 0
-            vallw = ""
-
+            vallw = ""            
             self.step2(ast[2])
+            funcname = ast[1]
             if ast[2][0] == "OP":
                 codegen.add_call( ast[1], ast[2][1][1] )
             else:
@@ -915,11 +958,18 @@ class Walker:
 
         elif ast[0] == "CLINST":
             arg = ""
-            for item in ast[3]:
-                if item[0] == "ID":
-                    arg += item[1]+", "
-                else:
-                    arg = item
+            try:
+                self.step2(ast[3])
+                for item in ast[3]:
+                    if item[0] == "ID":
+                        arg = item[1]+", "+item[2]
+                    elif item == "ID":
+                        arg = ast[3][1][1]
+                    else:
+                        arg = item
+            except:
+                pass
+            nowvar = ast[2]
             codegen.append( ["", "class>"+ast[1]+" "+ast[2]+"["+arg+"];"] )
         
         elif ast[0] == "CLASS":
@@ -940,7 +990,6 @@ class Walker:
                 hikisu = hikisu + item[2] + " and "
             codegen.append( ["", "in>"+ast[1]+"["+hikisu+"];"] )
 
-            funcname = ast[1]
             size = 0
             vallw = ""
 
@@ -953,9 +1002,9 @@ class Walker:
                         size+=1
             except IndexError:
                     pass
-            
-            funclis.append(ast[1]+":"+vallw)
+            funclis.append(ast[1]+":"+vallw+"!"+ast[3])
             funcd[ast[1]] = ast[4]
+            funcname = ast[1]
 
         elif ast[0] == "INLINE":
             if type( strd[ast[1][1]] ) == str:
@@ -975,6 +1024,18 @@ class Walker:
             except FileNotFoundError:
                 main( ast[1][1]+"."+ast[3][1] )
 
+        elif ast[0] == "OPEN":
+            print("open", ":", ast)
+        
+        elif ast[0] == "WRITE":
+            print("WRITE", ":", ast)
+        
+        elif ast[0] == "READ":
+            print("read", ":", ast)
+        
+        elif ast[0] == "CLOSE":
+            print("close", ":", ast)
+
         elif type(ast[0]) == tuple:
             for item in ast:
                 self.step2(item)
@@ -991,13 +1052,14 @@ def main( filename ):
             item = item.replace( "include ", "fninclude " )
         data += item
     file = data.replace( "\n", "" )
+    retcount = 0
     for i in range ( len( file.split( "fn" ) ) ):
         if file.split("fn")[i] != "":
             result = parser.parse( "fn"+file.split("fn")[i] )
             if result != None:
                 walker.walk(result)
                 codegen.out_put()
-
+            
 if __name__ == '__main__':  
     filename = sys.argv[1]
     main( filename )

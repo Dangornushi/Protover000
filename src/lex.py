@@ -40,6 +40,10 @@ tokens = (
     "INLINE",
     "EXIT",
     "FIB",
+    "OPEN",
+    "READ",
+    "WRITE",
+    "CLOSE",
 )
 
 #int型変数の宣言。
@@ -178,6 +182,14 @@ def t_ID(t):
             t.type = "EXIT"
         elif t.value == "fib":
             t.type = "FIB"
+        elif t.value == "open":
+            t.type == "OPEN"
+        elif t.value == "close":
+            t.type == "CLOSE"
+        elif t.value == "read":
+            t.type == "READ"
+        elif t.value == "write":
+            t.type == "WRITE"
         else:
             t.value = t.value.split( ";" )[0]
     return t

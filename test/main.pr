@@ -1,0 +1,12 @@
+include dango.ph
+include math.rh
+
+fn main => int {
+    int x = 8;
+    int y = 12;
+    int dango = fib(x);
+    int dango2 = max(x and y);
+    put(dango);
+    put(dango2);
+    return 0;
+}

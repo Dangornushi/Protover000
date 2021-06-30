@@ -1,0 +1,45 @@
+Main():
+in>sub1[x and y and ];
+in>sub2[x and y and ];
+end;
+cd;
+
+main():
+fode>int;
+mode>int;
+mov a 12;
+mode>int;
+mov b 3;
+inst cmain, Main;
+class>cmain sub1[b];
+end;
+cb;
+
+
+sub1(intxinty):
+mode>int;
+pop x;
+mode>int;
+pop y;
+add x, y;
+mode>int;
+mov ans x;
+msg y;
+msg "\n";
+ret main, ans;
+end;
+cb;
+
+
+sub2(intxinty):
+mode>int;
+pop x;
+mode>int;
+pop y;
+sub x, y;
+mode>int;
+mov x x;
+ret main, x;
+end;
+cb;
+

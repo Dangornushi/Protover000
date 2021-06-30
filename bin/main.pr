@@ -1,12 +1,19 @@
-include dango.ph
-include math.rh
+class Main {
+    sub1( int x and int y ) => int {
+        int ans = x + y;
+        return ans;
+    }
+    sub2( int x and int y ) => int {
+        int x = x - y;
+        return x;
+    }
+}
 
 fn main => int {
-    int x = 8;
-    int y = 12;
-    int dango = fib(x);
-    int dango2 = max(x and y);
-    put(dango);
-    put(dango2);
+    int a = 12;
+    int b = 3;
+    cmain = Main;
+    int s = cmain.sub1(a and b);
+    put(s);
     return 0;
 }
