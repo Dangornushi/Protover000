@@ -38,6 +38,11 @@ vector<string> funcnames;
 vector<string> gnames;
 //--------
 
+//ofstream(ファイル書き込み用変数の初期化＆定義)
+ifstream read_file;
+ofstream write_file;
+//--------
+
 /*
 TODO => VM関数
         引数：
@@ -149,9 +154,8 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
 
             else
             if ( vdata.find( "6d6f7620" ) != string::npos ) {
-                /*
-                TODO : This is mov
-                */
+                //TODO : This is mov
+                
                 string ans = split( split( strpri(vdata), "mov " )[1], " " )[0] ;
                 string a = split( strpri( vdata), "mov "+ans+" " )[1];
                 string data = a;
@@ -284,6 +288,11 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                     }
                 }
 
+                else
+                if ( mode == "file" ) {
+                    strvall[strvall[strvall[ans]]] += strvall[data];
+                }
+
                 scopint[funcname] = intvall;
                 scop[funcname] = strvall;
 
@@ -309,6 +318,36 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                 
                 // TODO: This is mode
                 mode = strpri( split( vdata, "6d6f64653e" )[1] );
+            }
+
+            else
+            if ( strpri(vdata).find( "open>" ) != string::npos ) {
+                
+                // TODO: This is open>
+                string base = split( strpri(vdata), "open>" )[1];
+                string open_filename = split( base, " " )[0];
+                string file_write_word = split( base, " " )[1];
+                string open_mode = split( base, " " )[2];
+                ifstream read_file(strvall[file_write_word]);
+
+                string cent = "";
+                string file_data = "";
+                while ( getline( read_file, cent ) ) {
+                    file_data += cent;
+                }
+                strvall[open_filename] = file_write_word;
+                strvall[strvall[file_write_word]] = file_data;
+            }
+
+            else
+            if ( strpri(vdata).find( "close>" ) != string::npos ) {
+                
+                // TODO: This is close>
+                string base = split( strpri(vdata), "close>" )[1];
+                string close_filename = strvall[strvall[base]];
+                string data = strvall[strvall[strvall[base]]];
+                ofstream ofs( close_filename );
+                ofs << data << endl;
             }
             
             else
@@ -435,15 +474,13 @@ void VM ( map<string, string> func, string funcname, int loopj ) {
                 int spc = 0;
                 if ( funclisc != 0 ) {
                     spc = funclisc+1;
-                    // TODO : fodo指定されない、指定する。classteigiのclass定義された瞬間にfode指定
                     if ( fode == "int" ) {
                         scopint[ funcnames[vecindex( funcnames, funcname )-spc] ][ strpri( funcn ) ] = intvall[ strpri( arg ) ] ;
                     }
                     else
                     if ( fode == "str" ) {
                         scop[ funcnames[vecindex( funcnames, funcname )-spc ] ][ strpri( funcn ) ] = strvall[ strpri( arg ) ] ;
-                    }// TODO
-                    //break;
+                    }
                 }
                 else {
                     spc = 1;

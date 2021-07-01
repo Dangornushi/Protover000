@@ -1,19 +1,6 @@
-class Main {
-    sub1( int x and int y ) => int {
-        int ans = x + y;
-        return ans;
-    }
-    sub2( int x and int y ) => int {
-        int x = x - y;
-        return x;
-    }
-}
 
 fn main => int {
-    int a = 12;
-    int b = 3;
-    cmain = Main;
-    int s = cmain.sub1(a and b);
-    put(s);
+    str putword = "Hello, world!!";
+    put(putword);
     return 0;
 }

@@ -24,6 +24,7 @@ nowvar = ""
 namestr = "L-1"
 nowvar2 = ""
 funcname = ""
+var = ""
 #--------
 
 #int型定義
@@ -88,31 +89,12 @@ def p_call(p):
     '''
     bun : ID KAKKO shiki KOKKA SEMI
     '''
-    p[0] = ( "CALL", p[1], p[3] )
-
-def p_call(p):
-    '''
-    bun : OPEN KAKKO shiki KOKKA SEMI
-    '''
-    p[0] = ( "OPEN", p[1], p[3] )
-
-def p_call(p):
-    '''
-    bun : CLOSE KAKKO shiki KOKKA SEMI
-    '''
-    p[0] = ( "CLOSE", p[1], p[3] )
-
-def p_call(p):
-    '''
-    bun : WRITE KAKKO shiki KOKKA SEMI
-    '''
-    p[0] = ( "WRITE", p[1], p[3] )
-
-def p_call(p):
-    '''
-    bun : READ KAKKO shiki KOKKA SEMI
-    '''
-    p[0] = ( "READ", p[1], p[3] )
+    if p[1] == "write":
+        p[0] = ("WRITE", p[3])
+    elif p[1] == "close":
+        p[0] = ("CLOSE", p[3])
+    else:
+        p[0] = ( "CALL", p[1], p[3] )
 
 def P_shiki_dins(p):
     """
@@ -411,7 +393,12 @@ def p_shiki_func_ret(p):
     """
     shiki : ID KAKKO shiki KOKKA
     """
-    p[0] = ("CALL", p[1], p[3])
+    if p[1] == "open":
+        p[0] = ("OPEN", p[3])
+    elif p[1] == "read":
+        p[0] = ("READ", p[3])
+    else:
+        p[0] = ("CALL", p[1], p[3])
 
 def p_shiki_clinst(p):
     """
@@ -489,6 +476,7 @@ class CodeGenartor:
         self.mList.append(line)
     
     def out_put( self ):
+        filename = sys.argv[1]
         wfile =  open ( filename+"s", "a", encoding="utf_8")
         wfile.truncate(0) 
         for item in self.mList:
@@ -674,7 +662,7 @@ class Walker:
 
     def step2(self,ast):
 
-        global  funcname, mode, funclis, kataw, ifc, iflisc, lisc, ast_2, funcd, classlist, clos, nowvar, nowvar2
+        global  funcname, mode, funclis, kataw, ifc, iflisc, lisc, ast_2, funcd, classlist, clos, nowvar, nowvar2, var
         if ast[0] == 'exp':
             self.step2(ast[1])
         
@@ -709,8 +697,8 @@ class Walker:
                 codegen.add_return( )
 
         elif ast[0] == 'ID':
-            pass
-            #codegen.add_sym( ast[1], funcname)
+            var = ast[1]
+            self.step2(ast[1])
         
         elif ast[0] == "WHILE":
             add = []
@@ -864,12 +852,13 @@ class Walker:
             if mode == "str":
                 nowvar = ast[2]
                 strd[ast[2]] = ast[3]
-                self.step2( ast[3] )
-                codegen.add_num({ast[2]:ast[3][1].replace( "\"", "")}, ast[2], ast[1])
-        
-        elif ast[0] == "ID":
-            codegen.append( ["", "mode>str;\nmov "+ast[2]+" "+ast[3][1]+";"] )
-        
+                try:
+                    self.step2( ast[3] )
+                    codegen.add_num({ast[2]:ast[3][1].replace( "\"", "")}, ast[2], ast[1])
+                
+                except:
+                    pass
+
         elif ast[0] == "TYPEF":
             codegen.append( ["", "mode>type;\nmov "+ast[2]+" "+ast[3][1][1]+";"] )
         
@@ -1025,17 +1014,22 @@ class Walker:
                 main( ast[1][1]+"."+ast[3][1] )
 
         elif ast[0] == "OPEN":
-            print("open", ":", ast)
+            self.step2(ast[1])
+            codegen.append( ["", "open>"+nowvar+" "+var+" "+ast[1][2]+";"] )
         
         elif ast[0] == "WRITE":
-            print("WRITE", ":", ast)
+            self.step2( ("ID", ast[1][1] ) )
+            v1 = var
+            self.step2( ("ID", ast[1][2] ) )
+            codegen.append( ["", "mode>file;\nmov "+v1+" "+var+";"] )
         
         elif ast[0] == "READ":
+            #TODO : 実装
             print("read", ":", ast)
         
         elif ast[0] == "CLOSE":
-            print("close", ":", ast)
-
+            self.step2(ast[1])
+            codegen.append( ["", "close>"+var+";"] )
         elif type(ast[0]) == tuple:
             for item in ast:
                 self.step2(item)
@@ -1060,6 +1054,6 @@ def main( filename ):
                 walker.walk(result)
                 codegen.out_put()
             
-if __name__ == '__main__':  
-    filename = sys.argv[1]
-    main( filename )
+if __name__ == '__main__':
+    funcname = sys.argv[1]
+    main( funcname )

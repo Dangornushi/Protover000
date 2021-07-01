@@ -1,0 +1,11 @@
+
+main():
+fode>int;
+mode>str;
+mov putword Hello, world!!;
+msg putword;
+msg "\n";
+ret main, 0;
+end;
+cb;
+
