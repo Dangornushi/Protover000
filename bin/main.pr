@@ -1,6 +1,13 @@
-
+class Calc {
+    calc( int a and int b ) => int {
+        int result = a + b;
+        return result;
+    }
+}
 fn main => int {
-    str putword = "Hello, world!!";
-    put(putword);
+    int x = 10;
+    int y = 2;
+    calcclass = Calc;
+    put(calcclass.calc(x and y));
     return 0;
 }
